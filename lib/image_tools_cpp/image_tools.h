@@ -12,19 +12,28 @@ using namespace cv;
 
 typedef std::vector<std::vector<Point>> cv_contours;
 typedef std::vector<Point> cv_contour;
-struct CameraImage {
+struct ImageData {
     int width;
     int height;
-    int rotation;
     uint8_t* bytes;
     bool isYUV;
 };
 
+struct PointList {
+    Point* ptr;
+    int size;
+};
+
+struct Uint8List {
+    uint8_t* ptr;
+    int size;
+};
+
 
 EXPORT
-Point* findDocumentBoundariesInImage(CameraImage *imageData);
+PointList* findDocumentBoundariesInImage(ImageData *imageData);
 EXPORT
-uint8_t* transformImage(CameraImage *imageData);
+Uint8List* transformImage(ImageData *imageData);
 
 
 #endif //CV_CPP_LIBRARY_H

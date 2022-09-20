@@ -21,7 +21,7 @@ std::vector<Point> getImageCorners(Mat &image) {
 }
 
 
-Mat loadImageFromMemory(int width, int height, int rotation, uint8_t* bytes, bool isYUV) {
+Mat loadImageFromMemory(int width, int height, uint8_t* bytes, bool isYUV) {
     Mat image;
     if (isYUV) {
         Mat yuv(height + height / 2, width, CV_8UC1, bytes);
@@ -74,17 +74,22 @@ std::vector<Point> findDocumentCorners(Mat& preprocessedImage) {
 }
 
 
-Point* findDocumentBoundariesInImage(CameraImage *imageData) {
-    Mat image = loadImageFromMemory(imageData->width, imageData->height, imageData->rotation, imageData->bytes, imageData->isYUV);
+PointList* findDocumentBoundariesInImage(ImageData *imageData) {
+    Mat image = loadImageFromMemory(imageData->width, imageData->height, imageData->bytes, imageData->isYUV);
     Mat preprocessedImage = preprocessImage(image);
     std::vector<Point> corners = findDocumentCorners(preprocessedImage);
-    corners.data();
+
+    auto *pointList = static_cast<PointList *>(malloc(sizeof(PointList)));
+    pointList->size = corners.size();
+    pointList->ptr = corners.data();
+
+    return pointList;
 } // TODO: Might need to return size as well
 
 
 
-uint8_t* transformImage(CameraImage *imageData) {
-    Mat image = loadImageFromMemory(imageData->width, imageData->height, imageData->rotation, imageData->bytes, imageData->isYUV);
+Uint8List* transformImage(ImageData *imageData) {
+    Mat image = loadImageFromMemory(imageData->width, imageData->height, imageData->bytes, imageData->isYUV);
     Mat preprocessedImage = preprocessImage(image);
     std::vector<Point> docCorners = findDocumentCorners(preprocessedImage);
     std::vector<Point> imageCorners = getImageCorners(image);
@@ -93,5 +98,9 @@ uint8_t* transformImage(CameraImage *imageData) {
     Mat transformedImage;
     warpPerspective(image, transformedImage, transformation, Size(image.cols, image.rows));
 
-    return transformedImage.data;
+    auto *uint8List = static_cast<Uint8List *>(malloc(sizeof(Uint8List)));
+    uint8List->size = transformedImage.total();
+    uint8List->ptr = transformedImage.data;
+
+    return uint8List;
 }

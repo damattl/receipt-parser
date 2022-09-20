@@ -6,6 +6,7 @@ Future<RecognizedText> processImage(InputImage inputImage) async {
   final RecognizedText recognizedText = await textRecognizer.processImage(inputImage);
 
 
+
   String fullText = recognizedText.text;
   dev.log(fullText);
   dev.log(recognizedText.blocks.toString());
