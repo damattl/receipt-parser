@@ -29,3 +29,9 @@ subprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+task copyImageToolsLib(type: Copy) {
+    from "../native_image_tools/lib"
+    into "$buildDir/src/main/jniLibs/ABI"
+}
+

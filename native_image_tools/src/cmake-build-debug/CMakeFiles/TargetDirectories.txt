@@ -1,0 +1,3 @@
+/mnt/c/Users/mattl/Development/Repos/receipt-parser/native_image_tools/src/cmake-build-debug/CMakeFiles/image_tools.dir
+/mnt/c/Users/mattl/Development/Repos/receipt-parser/native_image_tools/src/cmake-build-debug/CMakeFiles/edit_cache.dir
+/mnt/c/Users/mattl/Development/Repos/receipt-parser/native_image_tools/src/cmake-build-debug/CMakeFiles/rebuild_cache.dir

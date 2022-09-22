@@ -44,4 +44,5 @@ app.*.map.json
 /android/app/release
 
 
-/lib/image_tools_cpp/cmake-build-debug
+/native_image_tools/obj
+/native_image_tools/cmake-build-debug

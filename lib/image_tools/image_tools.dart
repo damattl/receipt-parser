@@ -5,13 +5,11 @@ import 'dart:typed_data';
 import 'package:camera/camera.dart';
 import 'package:ffi/ffi.dart';
 import 'package:receipt_parser/image_tools/c_structs.dart';
+import 'package:receipt_parser/image_tools/camera_image_extensions.dart';
 import 'package:receipt_parser/image_tools/image_data.dart';
-import 'package:receipt_parser/image_tools_cpp/camera_image_extensions.dart';
 
 typedef NativeTransformImageFunction = Pointer<C_Uint8List> Function(Pointer<ImageData>);
 typedef NativeFindDocumentBoundariesInImageFunction = Pointer<C_PointList> Function(Pointer<ImageData>);
-
-
 
 class ImageToolsFFI {
   static late DynamicLibrary nativeImageToolsLib;
@@ -19,7 +17,7 @@ class ImageToolsFFI {
   static late NativeFindDocumentBoundariesInImageFunction _findDocumentBoundariesInImage;
 
   static bool initialize() {
-    nativeImageToolsLib = Platform.isIOS ? DynamicLibrary.process() : (DynamicLibrary.open('libimage_tools_cpp.so'));
+    nativeImageToolsLib = Platform.isIOS ? DynamicLibrary.process() : (DynamicLibrary.open('libimage_tools.so'));
 
     final transformImagePtr = nativeImageToolsLib
         .lookup<NativeFunction<NativeTransformImageFunction>>('transformImage');

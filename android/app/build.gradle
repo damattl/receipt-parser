@@ -21,6 +21,7 @@ if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 }
 
+
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
@@ -40,7 +41,9 @@ android {
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
+        main.jniLibs.srcDirs += '../../native_image_tools/libs'
     }
+
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
@@ -61,11 +64,7 @@ android {
         }
     }
 
-    externalNativeBuild {
-        cmake {
-            path "../../libs/CMakeLists.txt"
-        }
-    }
+    project.tasks.preBuild.dependsOn('copyImageToolsLib')
 }
 
 flutter {
@@ -75,3 +74,9 @@ flutter {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
+
+tasks.register('copyImageToolsLib', Copy) {
+    from "../native_image_tools/lib"
+    into "$buildDir/src/main/jniLibs/ABI"
+}
+
