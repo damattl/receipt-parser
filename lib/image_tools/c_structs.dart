@@ -3,10 +3,11 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
+import 'package:receipt_parser/image_tools/image_data.dart';
 
 class C_Uint8List extends Struct {
-  @Int32()
-  external int size;
+  @Uint32()
+  external int length;
 
   external Pointer<Uint8> ptr;
 
@@ -16,9 +17,9 @@ class C_Uint8List extends Struct {
   }
 }
 
-extension Uint8ListExtensions on Pointer<C_Uint8List> {
+extension Uint8ListExtensions on Pointer<ImageData> {
   Uint8List toUint8List() {
-    final cBytes = ref.ptr.asTypedList(ref.size);
+    final cBytes = ref.bytes.asTypedList(ref.size);
     return Uint8List.fromList(cBytes);
   }
 }
@@ -31,8 +32,8 @@ class C_Point extends Struct {
 }
 
 class C_PointList extends Struct {
-  @Int32()
-  external int size;
+  @Uint32()
+  external int length;
 
   external Pointer<C_Point> ptr;
 
@@ -42,11 +43,12 @@ class C_PointList extends Struct {
   }
 }
 
-extension PointListExtensions on Pointer<C_PointList> {
+extension PointListExtensions on Pointer<C_Point> {
   List<Point> toList() {
     final list = <Point>[];
-    for (var i = 0; i <= ref.size; i++) {
-      final point = ref.ptr.elementAt(i).ref;
+    for (var i = 0; i < 4; i++) {
+      final point = elementAt(i).ref;
+
       list.add(Point(point.x, point.y));
     }
     return list;

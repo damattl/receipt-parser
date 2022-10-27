@@ -1,7 +1,5 @@
 import 'dart:ffi';
 
-import 'package:ffi/ffi.dart';
-
 class ImageData extends Struct {
   @Int32()
   external int width;
@@ -11,11 +9,12 @@ class ImageData extends Struct {
 
   external Pointer<Uint8> bytes;
 
+  @Uint32()
+  external int size;
+
+  @Int32()
+  external int rotation;
+
   @Bool()
   external bool isYUV;
-
-  free() {
-    malloc.free(bytes);
-    bytes = nullptr;
-  }
 }

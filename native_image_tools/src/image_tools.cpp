@@ -7,7 +7,11 @@ bool sortByDescendingArea(InputArray &a,  InputArray &b) {
     return contourArea(a) > contourArea(b);
 }
 
-std::vector<Point> getImageCorners(Mat &image) {
+
+
+
+
+std::vector<Point2i> getImageCorners(Mat &image) {
     int rows = image.rows;
     int cols = image.cols;
 
@@ -19,16 +23,28 @@ std::vector<Point> getImageCorners(Mat &image) {
     return {top_left, top_right, bottom_left, bottom_right};
 }
 
+void rotateMat(Mat &matImage, int rotation)
+{
+    if (rotation == 90) {
+        transpose(matImage, matImage);
+        flip(matImage, matImage, 1); //transpose+flip(1)=CW
+    } else if (rotation == 270) {
+        transpose(matImage, matImage);
+        flip(matImage, matImage, 0); //transpose+flip(0)=CCW
+    } else if (rotation == 180) {
+        flip(matImage, matImage, -1);    //flip(-1)=180
+    }
+}
 
-Mat loadImageFromMemory(int width, int height, uint8_t* bytes, bool isYUV) {
+Mat loadImageFromMemory(int width, int height, int rotation, uint8_t* bytes, bool isYUV) {
     Mat image;
-    if (isYUV) {
-        Mat yuv(height + height / 2, width, CV_8UC1, bytes);
-        cvtColor(yuv, image, COLOR_YUV2GRAY_NV21);
+    if (isYUV) { // TODO: Rename in isAndroid
+        image = Mat(height, width, CV_8UC1, bytes);
     } else {
         image = Mat(height, width, CV_8UC4, bytes);
-        cvtColor(image, image, COLOR_BGRA2GRAY);
     }
+    rotateMat(image, rotation);
+    // cvtColor(image, image, COLOR_BGRA2GRAY); not required for android
     return image;
 }
 
@@ -44,23 +60,24 @@ Mat preprocessImage(Mat& image) {
     return blur;
 }
 
-std::vector<Point> getMostFittingApproximation(cv_contours &contours) {
+std::vector<Point2i> getMostFittingApproximation(cv_contours &contours) {
     std::sort(contours.begin(), contours.end(), sortByDescendingArea);
 
-    for (int i = 0; i <= contours.size(); i++) {
+    for (int i = 0; i < contours.size(); i++) {
         if (i == 20) {
             return {}; // Check only the largest contours
         }
         double perimeter = arcLength(contours[i], true);
-        std::vector<Point> approximation;
+        std::vector<Point2i> approximation;
         approxPolyDP(contours[i], approximation, 0.05 * perimeter, false); // false for not closed shape
         if (approximation.size() == 4) {
             return approximation;
         }
     }
+    return {};
 }
 
-std::vector<Point> findDocumentCorners(Mat& preprocessedImage) {
+std::vector<Point2i> findDocumentCorners(Mat& preprocessedImage) {
     Mat edged;
     Canny(preprocessedImage, edged, 75, 200);
 
@@ -73,33 +90,26 @@ std::vector<Point> findDocumentCorners(Mat& preprocessedImage) {
 }
 
 
-PointList* findDocumentBoundariesInImage(ImageData *imageData) {
-    Mat image = loadImageFromMemory(imageData->width, imageData->height, imageData->bytes, imageData->isYUV);
+void findDocumentBoundariesInImage(ImageData *imageData, Point2i* boundaries) {
+    Mat image = loadImageFromMemory(imageData->width, imageData->height, imageData->rotation, imageData->bytes, imageData->isYUV);
     Mat preprocessedImage = preprocessImage(image);
-    std::vector<Point> corners = findDocumentCorners(preprocessedImage);
+    std::vector<Point2i> corners = findDocumentCorners(preprocessedImage);
 
-    auto *pointList = static_cast<PointList *>(malloc(sizeof(PointList)));
-    pointList->size = corners.size();
-    pointList->ptr = corners.data();
-
-    return pointList;
-} // TODO: Might need to return size as well
+    std::copy(corners.begin(), corners.end(), boundaries);
+}
 
 
 
-Uint8List* transformImage(ImageData *imageData) {
-    Mat image = loadImageFromMemory(imageData->width, imageData->height, imageData->bytes, imageData->isYUV);
+void transformImage(ImageData *imageData) {
+    Mat image = loadImageFromMemory(imageData->width, imageData->height, imageData->rotation, imageData->bytes, imageData->isYUV);
     Mat preprocessedImage = preprocessImage(image);
-    std::vector<Point> docCorners = findDocumentCorners(preprocessedImage);
-    std::vector<Point> imageCorners = getImageCorners(image);
+    std::vector<Point2i> docCorners = findDocumentCorners(preprocessedImage);
+    std::vector<Point2i> imageCorners = getImageCorners(image);
 
     Mat transformation = getPerspectiveTransform(docCorners, imageCorners);
     Mat transformedImage;
     warpPerspective(image, transformedImage, transformation, Size(image.cols, image.rows));
 
-    auto *uint8List = static_cast<Uint8List *>(malloc(sizeof(Uint8List)));
-    uint8List->size = transformedImage.total();
-    uint8List->ptr = transformedImage.data;
-
-    return uint8List;
+    imageData->size = transformedImage.total() *  sizeof(uint8_t);
+    std::copy(transformedImage.begin<uint8_t>(), transformedImage.end<uint8_t>(), imageData->bytes);
 }

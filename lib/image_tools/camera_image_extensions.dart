@@ -8,39 +8,35 @@ import 'package:receipt_parser/image_tools/image_data.dart';
 
 extension CameraImageConversion on CameraImage {
   Pointer<ImageData> newImageDataPointer() {
-    final yBuffer = planes[0].bytes;
-
-    Uint8List? uBuffer;
-    Uint8List? vBuffer;
-
-    if (Platform.isAndroid) {
-      uBuffer = planes[1].bytes;
-      vBuffer = planes[2].bytes;
+    Uint8List? buffer;
+    if (format.group == ImageFormatGroup.yuv420) {
+      buffer = _bufferFromYUV();
     }
 
-    final bufferSize = calculateBufferSize(yBuffer, uBuffer, vBuffer);
-    final imageBuffer = malloc.allocate<Uint8>(bufferSize);
-
-    Uint8List bytes = imageBuffer.asTypedList(bufferSize);
-    bytes.setAll(0, yBuffer);
-
-    if (Platform.isAndroid) {
-      bytes.setAll(yBuffer.lengthInBytes, vBuffer!); // OpenCV needs u and v swapped
-      bytes.setAll(yBuffer.lengthInBytes + vBuffer.lengthInBytes, uBuffer!);
+    if (format.group == ImageFormatGroup.bgra8888) {
+      buffer = planes[0].bytes;
     }
 
-    final imageDataPtr = malloc<ImageData>();
-    imageDataPtr.ref.bytes = imageBuffer;
+    if (buffer == null) {
+      throw FormatException("ImageFormat ${format.group} is not supported");
+    }
+
+    final bufferPtr = malloc.allocate<Uint8>(buffer.lengthInBytes);
+    Uint8List bytes = bufferPtr.asTypedList(buffer.lengthInBytes);
+    bytes.setAll(0, buffer);
+
+    final imageDataPtr = calloc<ImageData>();
+    imageDataPtr.ref.bytes = bufferPtr;
+    imageDataPtr.ref.size = buffer.lengthInBytes;
     imageDataPtr.ref.width = width;
     imageDataPtr.ref.height = height;
-    imageDataPtr.ref.isYUV = Platform.isAndroid;
-
+    imageDataPtr.ref.isYUV = format.group == ImageFormatGroup.yuv420;
 
     return imageDataPtr;
   }
 
   int calculateBufferSize(Uint8List yBuffer, Uint8List? uBuffer, Uint8List? vBuffer) {
-    final ySize = planes[0].bytes.lengthInBytes;
+    final ySize = planes[0].bytes.lengthInBytes; // OR LENGTH IN BYTES?
     if (Platform.isAndroid) {
       final uSize = planes[1].bytes.lengthInBytes;
       final vSize = planes[2].bytes.lengthInBytes;
@@ -48,4 +44,14 @@ extension CameraImageConversion on CameraImage {
     }
     return ySize;
   }
+
+  Uint8List _bufferFromYUV() {
+    var yBuffer = planes[0].bytes;
+    if (planes.length == 1) {
+      final bufferSize = width * height;
+      yBuffer = Uint8List.view(yBuffer.buffer).sublist(0, bufferSize);
+    }
+    return yBuffer;
+  }
 }
+

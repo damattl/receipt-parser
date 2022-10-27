@@ -10,30 +10,22 @@
 
 using namespace cv;
 
-typedef std::vector<std::vector<Point>> cv_contours;
-typedef std::vector<Point> cv_contour;
+typedef std::vector<std::vector<Point2i>> cv_contours;
+typedef std::vector<Point2i> cv_contour;
 struct ImageData {
     int width;
     int height;
     uint8_t* bytes;
+    size_t size;
+    int rotation;
     bool isYUV;
 };
 
-struct PointList {
-    Point* ptr;
-    int size;
-};
-
-struct Uint8List {
-    uint8_t* ptr;
-    int size;
-};
-
 
 EXPORT
-PointList* findDocumentBoundariesInImage(ImageData *imageData);
+void findDocumentBoundariesInImage(ImageData* imageData, Point2i* boundaries);
 EXPORT
-Uint8List* transformImage(ImageData *imageData);
+void transformImage(ImageData* imageData);
 
 
 #endif //CV_CPP_LIBRARY_H
