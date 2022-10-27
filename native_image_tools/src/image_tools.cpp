@@ -42,9 +42,9 @@ Mat loadImageFromMemory(int width, int height, int rotation, uint8_t* bytes, boo
         image = Mat(height, width, CV_8UC1, bytes);
     } else {
         image = Mat(height, width, CV_8UC4, bytes);
+        cvtColor(image, image, COLOR_BGRA2GRAY);
     }
     rotateMat(image, rotation);
-    // cvtColor(image, image, COLOR_BGRA2GRAY); not required for android
     return image;
 }
 
