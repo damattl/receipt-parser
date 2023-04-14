@@ -1,25 +1,28 @@
 #include <iostream>
 #include <opencv2/core.hpp>
-#include <fstream>
+#include "debug/debug_tools.cpp"
 #include "../src/image_tools.h"
 
 using namespace cv;
+using namespace std;
 
-void printShape(const Mat& img) {
-    auto size = img.size();
-    std::cout << "Height: " << size.height << ", Width: " << size.width << ", Channels: " << img.channels() << std::endl;
-}
-
-int multiplyIntByDouble(int i, double d) {
-    double x = 1.0 * i * d;
-    return (int)round(x);
-}
-
-int getYHeight(int height) {
-    return multiplyIntByDouble(height, 2.0/3.0);
-}
 
 int main() {
+    Mat image = cv::imread("../samples/receipt_2.jpg", cv::IMREAD_GRAYSCALE);
+    Mat original = image.clone();
+
+    auto imageCorners = getImageCorners(original);
+
+    double ratio = 400.0 / image.cols;
+
+    preprocessImage(image, ratio);
+
+    cv_contour docCorners = findDocumentCorners(image);
+
+    warpImage(original, docCorners, imageCorners, ratio);
+
+    showImage(original);
+
     /*std::ifstream infile("./samples/sample_0.yuv");
     infile.seekg(0, std::ios::end);
     size_t length = infile.tellg();
@@ -39,7 +42,7 @@ int main() {
     Mat bgr;
     cvtColor(yuv, bgr, COLOR_YUV420p2BGR); */
 
-    Mat jpg = imread("../samples/sample_0.jpg");
+    /* Mat jpg = imread("../samples/sample_0.jpg");
     printShape(jpg);
 
     Mat yuv;
@@ -60,5 +63,5 @@ int main() {
     // a = 2/3x
 
 
-    return 0;
+    return 0; */
 }
