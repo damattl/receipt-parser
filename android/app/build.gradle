@@ -54,6 +54,11 @@ android {
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
+        externalNativeBuild {
+            ndkBuild {
+                cppFlags ''
+            }
+        }
     }
 
     buildTypes {
@@ -63,6 +68,11 @@ android {
             signingConfig signingConfigs.debug
         }
     }
+    /*externalNativeBuild {
+        ndkBuild {
+            path file('../../native_image_tools/Android.mk')
+        }
+    }*/
 
     project.tasks.preBuild.dependsOn('copyImageToolsLib')
 }

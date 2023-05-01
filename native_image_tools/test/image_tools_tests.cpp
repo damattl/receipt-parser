@@ -6,8 +6,43 @@
 using namespace cv;
 using namespace std;
 
+void yuvTesting() {
+    Mat jpg = imread("../samples/receipt_2.jpg");
+    printShape(jpg);
+
+    Mat yuv;
+    cvtColor(jpg, yuv, cv::COLOR_BGR2YUV_I420);
+    printShape(yuv);
+
+
+
+    /* vector<Mat> channels(3);
+    split(yuv, channels);
+    auto y = channels[0];
+    auto cr = channels[1];
+    auto cb = channels[2];
+    auto yuvSize = yuv.size();
+
+    std::cout << yuvSize.width << std::endl;
+    std::cout << yuvSize.height << std::endl;
+    std::cout << y.size().width << std::endl;
+    std::cout << y.size().height << std::endl;
+    std::cout << cr.size().width << std::endl;
+    std::cout << cr.size().height << std::endl;
+    std::cout << cb.size().width << std::endl;
+    std::cout << cb.size().height << std::endl;
+    std::cout << getYHeight(yuvSize.height) << std::endl;*/
+    // Mat y = yuv(Rect(0, 0, yuvSize.width, getYHeight(yuvSize.height)));
+    // printShape(y);
+    showImage(yuv);
+    // showImage(y);
+}
 
 int main() {
+
+    yuvTesting();
+    return 0;
+
     Mat image = cv::imread("../samples/receipt_2.jpg", cv::IMREAD_GRAYSCALE);
     Mat original = image.clone();
 

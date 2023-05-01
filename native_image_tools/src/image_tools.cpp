@@ -1,10 +1,15 @@
 #include "image_tools.h"
 #include <iostream>
 
-using namespace cv;
-
-
 void findDocumentBoundariesInImage(ImageData *imageData, Point2i* boundaries) {
+    auto data = *imageData;
+
+    cout << "ImageData.isYUV:" << data.isYUV << endl;
+    cout << "ImageData.width:" << data.width << endl;
+    cout << "ImageData.height:" << data.height << endl;
+    cout << "ImageData.size:" << data.size << endl;
+    cout << "ImageData.rotation:" << data.rotation << endl;
+
     Mat image = loadImageFromMemory(imageData->width, imageData->height, imageData->rotation, imageData->bytes, imageData->isYUV);
 
     double ratio = 400.0 / image.cols;

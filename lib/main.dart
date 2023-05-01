@@ -1,11 +1,14 @@
 import 'package:camera/camera.dart';
+import 'dart:developer' as dev;
 import 'package:flutter/material.dart';
 import 'package:receipt_parser/camera_screen.dart';
 import 'package:receipt_parser/image_tools/image_tools.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  ImageToolsFFI.initialize();
+  dev.log("Before init");
+
+  dev.log("After init");
   runApp(const MyApp());
 }
 

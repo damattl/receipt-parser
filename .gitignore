@@ -45,6 +45,8 @@ app.*.map.json
 
 
 /native_image_tools/obj
-/native_image_tools/cmake-build-debug
+/native_image_tools/src/cmake-build-debug
+native_image_tools/src/cmake-build-release/
 native_image_tools/test/cmake-build-debug/
+native_image_tools/test/cmake-build-release/
 /ios/opencv2.framework

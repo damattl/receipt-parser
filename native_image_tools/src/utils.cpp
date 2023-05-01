@@ -1,9 +1,6 @@
 #include <vector>
 #include <opencv2/opencv.hpp>
 
-//
-// Created by Martin Mayer on 14.04.23.
-//
 std::vector<cv::Point2f> getImageCorners(cv::Mat &image) {
     int rows = image.rows;
     int cols = image.cols;
@@ -29,16 +26,19 @@ void rotateMat(cv::Mat &matImage, int rotation)
     }
 }
 
-cv::Mat loadImageFromMemory(int width, int height, int rotation, uint8_t* bytes, bool isYUV) {
+cv::Mat loadImageFromMemory(int width, int height, int rotation, uint8_t* bytes, int isYUV) {
     cv::Mat image;
+    cv::Mat gray;
     if (isYUV) { // TODO: Rename in isAndroid
         image = cv::Mat(height, width, CV_8UC1, bytes);
+        gray = image.clone();
     } else {
         image = cv::Mat(height, width, CV_8UC4, bytes);
-        cvtColor(image, image, cv::COLOR_BGRA2GRAY);
+        gray = image.clone();
+        cvtColor(gray, gray, cv::COLOR_BGRA2GRAY);
     }
-    rotateMat(image, rotation);
-    return image;
+    rotateMat(gray, rotation);
+    return gray;
 }
 
 

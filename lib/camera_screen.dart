@@ -5,6 +5,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:receipt_parser/image_tools/image_boundaries_painter.dart';
 import 'package:receipt_parser/image_tools/image_tools.dart';
+import 'package:receipt_parser/image_tools/image_worker.dart';
 import 'package:receipt_parser/result_screen.dart';
 import 'dart:developer' as dev;
 
@@ -23,7 +24,7 @@ class CameraScreen extends StatefulWidget {
 class _CameraScreenState extends State<CameraScreen> {
   late CameraController _controller;
   late Future<void> _initializeControllerFuture;
-
+  final ImageWorker _worker = ImageWorker();
   bool _canProcess = true;
   bool _isBusy = false;
   int _lastRun = 0;
@@ -33,6 +34,7 @@ class _CameraScreenState extends State<CameraScreen> {
   @override
   void initState() {
     super.initState();
+    dev.log("Call me maybe");
     _startLiveFeed();
   }
 
@@ -46,13 +48,16 @@ class _CameraScreenState extends State<CameraScreen> {
     );
 
     _initializeControllerFuture = _controller.initialize();
-    _initializeControllerFuture.then((_) {
-      if (!mounted) {
-        return;
-      }
-      _controller.startImageStream(_processCameraImage);
-      setState(() {});
-    });
+    _handleAsyncInitialisation();
+  }
+  Future _handleAsyncInitialisation() async {
+    await _initializeControllerFuture;
+    await _worker.init();
+    if (!mounted) {
+      return;
+    }
+    _controller.startImageStream(_processCameraImage);
+    setState(() {});
   }
 
   Future _stopLiveFeed() async {
@@ -110,9 +115,16 @@ class _CameraScreenState extends State<CameraScreen> {
   Future _processCameraImage(CameraImage image) async {
     if (!_canProcess) return;
     if (_isBusy || DateTime.now().millisecondsSinceEpoch - _lastRun < 1000) return;
+
     _isBusy = true;
-    final boundaries = ImageToolsFFI.findBoundariesInImage(image, _cameraRotation);
+    final boundaries = await _worker.findImageBoundaries(image);
+    dev.log("Hello world");
     dev.log(boundaries.toString());
+
+    if (boundaries == null) {
+      return;
+    }
+
     if (boundaries.length != 4) {
       _isBusy = false;
       return;
@@ -121,7 +133,7 @@ class _CameraScreenState extends State<CameraScreen> {
     setState(() {
       _boundaryPainter = ImageBoundariesPainter(
           boundaries,
-          Size(image.height.toDouble(), image.width.toDouble())
+          Size(image.width.toDouble(), image.height.toDouble()),
       );
     });
     _lastRun = DateTime.now().millisecondsSinceEpoch;
@@ -132,6 +144,7 @@ class _CameraScreenState extends State<CameraScreen> {
   void dispose() {
     _canProcess = false; // TODO: Dispose ImageTools?
     _stopLiveFeed();
+    _worker.dispose();
     super.dispose();
   }
 }

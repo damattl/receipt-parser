@@ -1,7 +1,11 @@
 //
 // Created by Martin Mayer on 14.04.23.
 //
+#include <vector>
+#include <opencv2/opencv.hpp>
+
 using namespace std;
+using namespace cv;
 
 typedef std::vector<std::vector<Point2i>> cv_contours;
 typedef std::vector<Point2i> cv_contour;

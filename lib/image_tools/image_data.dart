@@ -1,20 +1,20 @@
-import 'dart:ffi';
+import 'dart:ffi' as ffi;
 
-class ImageData extends Struct {
-  @Int32()
+class ImageData extends ffi.Struct {
+  @ffi.Int()
   external int width;
 
-  @Int32()
+  @ffi.Int()
   external int height;
 
-  external Pointer<Uint8> bytes;
-
-  @Uint32()
+  @ffi.UnsignedLong()
   external int size;
 
-  @Int32()
+  @ffi.Int()
   external int rotation;
 
-  @Bool()
-  external bool isYUV;
+  @ffi.Int()
+  external int isYUV;
+
+  external ffi.Pointer<ffi.Uint8> bytes;
 }

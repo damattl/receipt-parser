@@ -7,10 +7,12 @@
 #include <vector>
 #include <iostream>
 #include <opencv2/opencv.hpp>
+
 #include "preprocessing.cpp"
 #include "extraction.cpp"
 #include "utils.cpp"
 #include "transform.cpp"
+
 
 using namespace cv;
 
@@ -20,10 +22,10 @@ typedef std::vector<Point2i> cv_contour;
 struct ImageData {
     int width;
     int height;
-    uint8_t* bytes;
     size_t size;
     int rotation;
-    bool isYUV;
+    int isYUV;
+    uint8_t* bytes;
 };
 
 
